@@ -160,6 +160,11 @@
   <script>
     // ====== DANE: 20 kategorii × 100 haseł (uzupełniane automatycznie) ======
     const categories = {
+      // Usuń placeholdery „Hasło #n” – zostawiamy tylko prawdziwe słowa
+for (const [k, arr] of Object.entries(categories)) {
+  categories[k] = arr.filter(x => !/^\s*hasło\s*#?\d+\s*$/i.test(x));
+}
+
       "Film": [
         "Oscary", "Plan zdjęciowy", "Kaskader", "Kamera", "Reżyser", "Scenariusz", "Montage", "Kadr", "Premiera",
         "Sequel", "Trylogia", "Plakat", "Kostiumy", "Charakteryzacja", "Dubler", "Czerwony dywan", "Kino domowe",
@@ -291,11 +296,7 @@
       ]
     };
 
-    // Uzupełnij każdą kategorię do 100 haseł placeholderami "Hasło #n"
-    for (const [k, arr] of Object.entries(categories)) {
-      while (arr.length < 100) arr.push(`Hasło #${arr.length+1}`);
-    }
-
+  
     // ====== STAN GRY ======
     let state = {
       players: 5,
@@ -524,7 +525,11 @@
       results.push(assert('Losuje z wybranej puli', state.category === ALL_CATS[0]));
 
       // 3. Każda lista ma >=100 haseł
-      results.push(assert('Każda kategoria ma 100 haseł', ALL_CATS.every(k=>categories[k].length===100)));
+      const enough = ALL_CATS.every(k=>categories[k].length > 20);
+results.push(assert('W każdej kategorii >20 prawdziwych haseł', enough));
+const noPlaceholders = Object.values(categories).flat().every(x=>!/^(hasło\s*#?\d+)$/i.test(x));
+results.push(assert('Brak placeholderów typu "Hasło #n"', noPlaceholders));
+
 
       // 4. Hasło nie wycieka do historii ani do głównego UI
       const text = document.body.innerText;
